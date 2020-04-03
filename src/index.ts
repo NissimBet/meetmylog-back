@@ -1,9 +1,5 @@
-import express from 'express';
+// entry point del servidor
+import { app } from './server';
+import { PORT } from './utils/config';
 
-const app = express();
-
-app.get('/', (req, res) => {
-  res.send('Hello world');
-});
-
-app.listen(3000, () => console.log(`Listening at port ${3000}`));
+app.listen(PORT, () => console.log(`Listening at port ${PORT}`));
