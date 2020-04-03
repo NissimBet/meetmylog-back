@@ -1,10 +1,18 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import mongoose from 'mongoose';
+
 import { userRouter } from './routes';
-import { CLIENT_URL } from './utils/config';
+import { CLIENT_URL, DB_URL } from './utils/config';
 
 const app = express();
+
+mongoose.connect(DB_URL, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
+});
 
 const options: cors.CorsOptions = {
   allowedHeaders: [

@@ -1,3 +1,3 @@
-import { router as userRouter } from './Users/user';
+import { router as userRouter } from './UsersRoute/user';
 
 export { userRouter };
