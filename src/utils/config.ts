@@ -6,4 +6,4 @@ export const SECRET =
   process.env.SECRET || 'e5e9fa1ba31ecd1ae84f75caaa474f3a663f05f4';
 
 export const DB_URL =
-  process.env.DATABASE_URI || 'http://localhost:27017/meetmylog';
+  process.env.DATABASE_URI || 'mongodb://localhost:27017/meetmylog';
