@@ -3,10 +3,20 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 
+// chat implementation libraries
+import http from 'http';
+import io from 'socket.io';
+
 import { userRouter } from './routes';
 import { CLIENT_URL, DB_URL } from './utils/config';
 
-const app = express();
+// express handles routing and functionality
+// http manages server
+const expressApp = express();
+
+// web server on top of express
+const httpServer = new http.Server(expressApp);
+const ioService = io(httpServer);
 
 mongoose.connect(DB_URL, {
   useNewUrlParser: true,
@@ -29,16 +39,16 @@ const options: cors.CorsOptions = {
   preflightContinue: false,
 };
 
-app.use(cors(options));
-app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true }));
+expressApp.use(cors(options));
+expressApp.use(bodyParser.json());
+expressApp.use(express.urlencoded({ extended: true }));
 
-app.use(userRouter);
+expressApp.use(userRouter);
 
-app.get('/', (req, res) => {
+expressApp.get('/', (req, res) => {
   res.send('Hello world');
 });
 
-app.options('*', cors(options));
+expressApp.options('*', cors(options));
 
-export { app };
+export { httpServer as app };
