@@ -83,8 +83,6 @@ export const UserModel = {
       throw Error(error);
     }
   },
-
-  // TODO: Get _id from userId
 };
 
 export function extractPublicProperties(user: UserDataModel) {

@@ -43,14 +43,15 @@ export const GroupModel = {
       throw Error(error);
     }
   },
-  async update(groupId: string, member: string): Promise<GroupDataModel> {
+  async pushMember(groupId: string, member: string): Promise<GroupDataModel> {
     try {
-      const update = await Group.updateOne(
-        { groupId },
-        { $push: { members: member } }
-      );
+      const group = await Group.findOne({ groupId });
+      if (member in group.members) {
+        group.members.push(member);
+        await group.save();
+      }
 
-      return update;
+      return group;
     } catch (error) {
       console.log(`Error, Could not update ${groupId}`, error);
       throw Error(error);
