@@ -1,3 +1,4 @@
-import { UserModel } from './UserModel/User';
+import { UserModel } from './user/User.Model';
+import { MeetingModel } from './meeting/Meeting.Model';
 
-export { UserModel };
+export { UserModel, MeetingModel };

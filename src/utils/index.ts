@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import omit from 'lodash.omit';
+
 import { SECRET } from './config';
 
 const SaltingRounds = 10;
@@ -40,3 +42,7 @@ export function extractToken(token: string): TokenData {
   jwt.verify(token, SECRET, (_, decoded) => (data = <TokenData>decoded));
   return data;
 }
+
+/* export function omitProperties(child: Object, parent: Object) {
+  return omit(child, Object.keys(parent));
+} */

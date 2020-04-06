@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { UserModel } from '../../models';
-import { FindUser, CreateUser } from './../../models/UserModel/User';
+import { FindUser, CreateUser } from '../../models/user/User.types';
 
-import { encryptMessage, createToken } from './../../utils';
+import { encryptMessage, createToken } from '../../utils';
 
 export class UserController {
   async login(req: Request, res: Response) {
@@ -21,16 +21,15 @@ export class UserController {
         password: encryptedPass,
       });
 
-      const { email, userId } = user;
-
-      const token = createToken({ email, userId, username });
-
-      if (user) {
-        return res.status(200).json({ email, userId, username, token });
+      if (!user) {
+        res.statusMessage = 'Username or password incorrect';
+        return res.status(404).send();
       }
 
-      res.statusMessage = 'Username or password incorrect';
-      return res.status(404).send();
+      const { email, userId } = user;
+      const token = createToken({ email, userId, username });
+
+      return res.status(200).json({ email, userId, username, token });
     } catch (error) {
       console.error(error);
       return res.status(500);
@@ -53,7 +52,7 @@ export class UserController {
 
       const encryptedPass = await encryptMessage(password);
 
-      const userData = <CreateUser>{
+      const userData: CreateUser = {
         email,
         name,
         password: encryptedPass,
@@ -68,7 +67,6 @@ export class UserController {
       }
 
       const user = await UserModel.create(userData);
-
       const token = createToken({ email, username, userId: user.userId });
 
       return res.status(201).json({ ...user, token });
