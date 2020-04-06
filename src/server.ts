@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 import http from 'http';
 import io from 'socket.io';
 
-import { userRouter } from './routes';
+import { userRouter, groupRouter, meetingRouter } from './routes';
 import { CLIENT_URL, DB_URL } from './utils/config';
 
 // express handles routing and functionality
@@ -44,6 +44,8 @@ expressApp.use(bodyParser.json());
 expressApp.use(express.urlencoded({ extended: true }));
 
 expressApp.use(userRouter);
+expressApp.use(groupRouter);
+expressApp.use(meetingRouter);
 
 expressApp.get('/', (req, res) => {
   res.send('Hello world');

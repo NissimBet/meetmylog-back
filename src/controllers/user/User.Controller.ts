@@ -44,14 +44,14 @@ export class UserController {
 
   async get(req: Request, res: Response) {
     try {
-      const { userId } = req.params;
+      const { id: userId } = req.params;
 
       const token = req.headers.authorization;
       const tokenData = extractToken(token);
 
       if (!tokenData) {
         res.statusMessage = 'User Unauthorized';
-        return res.status(403).send();
+        return res.status(401).send();
       }
 
       const user = await UserModel.getData({ userId });

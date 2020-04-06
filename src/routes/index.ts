@@ -1,3 +1,5 @@
-import { router as userRouter } from './UsersRoute/user';
+import { router as userRouter } from './user/User.Routes';
+import { router as groupRouter } from './groups/Group.Routes';
+import { router as meetingRouter } from './meeting/Meeting.Routes';
 
-export { userRouter };
+export { userRouter, groupRouter, meetingRouter };

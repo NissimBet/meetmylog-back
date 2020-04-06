@@ -1,6 +1,6 @@
 import { Response, Request } from 'express';
-import { GroupModel, UserModel } from './../../models';
-import { CreateGroup } from './../../models/group/Group.types';
+import { GroupModel, UserModel } from '../../models';
+import { CreateGroup } from '../../models/group/Group.types';
 
 export class GroupController {
   async createGroup(req: Request, res: Response) {
@@ -22,7 +22,7 @@ export class GroupController {
   }
   async getGroup(req: Request, res: Response) {
     try {
-      const { groupId } = req.params;
+      const { id: groupId } = req.params;
 
       const group = await GroupModel.get(groupId);
 

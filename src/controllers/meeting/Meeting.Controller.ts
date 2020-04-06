@@ -6,6 +6,7 @@ import {
   MeetingData,
   Chat,
 } from '../../models/meeting/Meeting.types';
+import { validateToken } from './../../utils';
 
 export class MeetingController {
   async findById(req: Request, res: Response) {
@@ -44,7 +45,17 @@ export class MeetingController {
   async addChat(req: Request, res: Response) {
     try {
       // this shouldd verify user in meeting for chat
-      const { from, message, meetingId } = req.body;
+      const { from, message } = req.body;
+      const { id: meetingId } = req.params;
+
+      const token = req.headers.authorization;
+      const isValid = validateToken(token);
+
+      if (!isValid) {
+        res.statusMessage = 'User not authorized';
+        return res.status(401).send();
+      }
+
       const chat: Chat = {
         from: String(from),
         message: String(message),
