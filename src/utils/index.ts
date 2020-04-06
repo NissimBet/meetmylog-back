@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import omit from 'lodash.omit';
+import pick from 'lodash.pick';
 
 import { SECRET } from './config';
 
@@ -40,7 +40,7 @@ export function validateToken(token: string = ''): boolean {
   return wasDecoded;
 }
 
-export function extractToken(token: string): TokenData {
+export function extractToken(token: string = ''): TokenData {
   let data: TokenData = null;
   jwt.verify(
     extractBearer(token),
@@ -54,6 +54,13 @@ export function extractBearer(token: string): string {
   return token.replace('Bearer ', '');
 }
 
-/* export function omitProperties(child: Object, parent: Object) {
-  return omit(child, Object.keys(parent));
-} */
+export function extractProperties<T, K extends keyof T>(
+  obj: T,
+  keys: Array<K>
+): Pick<T, K> {
+  const ret: any = {};
+  keys.forEach((key) => {
+    ret[key] = obj[key];
+  });
+  return ret;
+}

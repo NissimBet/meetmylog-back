@@ -58,10 +58,9 @@ export class GroupController {
         return res.status(406).send();
       }
 
-      const user = (await UserModel.getData({ userId: memberId }))._id;
-      //const user = await UserModel.checkExistence({ userId: memberId });
+      const userExists = await UserModel.checkExistence({ userId: memberId });
 
-      if (!user) {
+      if (!userExists) {
         res.statusMessage = 'User non existant';
         return res.status(404).send();
       }

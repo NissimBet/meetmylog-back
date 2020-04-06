@@ -8,6 +8,7 @@ import {
   CheckUser,
   GetUser,
 } from './User.types';
+import { extractProperties } from '../../utils';
 
 mongoose.Promise = global.Promise;
 
@@ -34,17 +35,29 @@ export const UserModel = {
       throw Error(error);
     }
   },
-  async findOne(userData: FindUser): Promise<UserDataModel> {
+  async findOne(userData: FindUser) {
     try {
       const user = await User.findOne({ ...userData });
 
-      return user;
+      return extractPublicProperties(user);
     } catch (error) {
       console.log(`Error finding user ${userData.email}`, error);
       throw Error(error);
     }
   },
-  async getData({ userId, email }: GetUser): Promise<UserDataModel> {
+  async getPublicData({ userId, email }: GetUser) {
+    try {
+      if (!userId && !email) throw Error('data is null');
+
+      const user = await User.findOne({ $or: [{ userId }, { email }] });
+
+      return extractPublicProperties(user);
+    } catch (error) {
+      console.log(`Error finding user ${userId}`, error);
+      throw Error(error);
+    }
+  },
+  async getData({ userId, email }: GetUser) {
     try {
       if (!userId && !email) throw Error('data is null');
 
@@ -73,3 +86,7 @@ export const UserModel = {
 
   // TODO: Get _id from userId
 };
+
+export function extractPublicProperties(user: UserDataModel) {
+  return extractProperties(user, ['username', 'name', 'email', 'userId']);
+}

@@ -29,8 +29,6 @@ export class UserController {
         return res.status(404).send();
       }
 
-      console.log(user.password);
-
       const isPasswordMatch = await compareHash(password, user.password);
       if (isPasswordMatch) {
         res.statusMessage = 'Password incorrect';
@@ -60,7 +58,7 @@ export class UserController {
         return res.status(401).send();
       }
 
-      const user = await UserModel.getData({ userId });
+      const user = await UserModel.getPublicData({ userId });
       if (!user) {
         res.statusMessage = 'User not found';
         return res.status(404).send();
