@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CreateMeeting,
   UpdateMeeting,
@@ -10,11 +10,11 @@ import {
 mongoose.Promise = global.Promise;
 
 const MeetingSchema = new Schema({
-  meetingId: { type: String, default: uuid.v4 },
+  meetingId: { type: String, default: () => uuidv4() },
   meetingName: { type: String },
   startedDate: { type: Date, default: () => new Date() },
   finishedDate: { type: Date, default: () => new Date() },
-  ongoing: { type: Boolean, default: () => false },
+  ongoing: { type: Boolean, default: () => true },
   creator: { type: Schema.Types.ObjectId, ref: 'user' },
   chat: [
     {
@@ -36,13 +36,7 @@ const Meeting = mongoose.model<MeetingModelData>('meetings', MeetingSchema);
 export const MeetingModel = {
   async create(meetingData: CreateMeeting): Promise<MeetingData> {
     try {
-      const createdMeeting = await Meeting.create(
-        meetingData,
-        (err: any, newDoc: MeetingModelData) => {
-          if (err) throw Error(err);
-          return newDoc;
-        }
-      );
+      const createdMeeting = await Meeting.create(meetingData);
 
       return createdMeeting;
     } catch (error) {
@@ -69,13 +63,7 @@ export const MeetingModel = {
   },
   async findOne(meetingId: string): Promise<MeetingData> {
     try {
-      const meeting = await Meeting.findOne(
-        { meetingId: meetingId },
-        (err, doc) => {
-          if (err) throw Error(err);
-          return doc;
-        }
-      );
+      const meeting = await Meeting.findOne({ meetingId });
       return meeting;
     } catch (error) {
       console.log(`Error finding ${meetingId}`, error);

@@ -7,6 +7,7 @@ import {
   createToken,
   validateToken,
   extractToken,
+  compareHash,
 } from '../../utils';
 
 export class UserController {
@@ -19,15 +20,20 @@ export class UserController {
         return res.status(406).send();
       }
 
-      const encryptedPass = await encryptMessage(password);
-
-      const user = await UserModel.findOne({
+      const user = await UserModel.getData({
         email,
-        password: encryptedPass,
       });
 
       if (!user) {
-        res.statusMessage = 'Username or password incorrect';
+        res.statusMessage = 'User does not exist';
+        return res.status(404).send();
+      }
+
+      console.log(user.password);
+
+      const isPasswordMatch = await compareHash(password, user.password);
+      if (isPasswordMatch) {
+        res.statusMessage = 'Password incorrect';
         return res.status(404).send();
       }
 

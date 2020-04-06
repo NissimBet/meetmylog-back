@@ -14,6 +14,8 @@ export class MeetingController {
       const { id } = req.params;
       const meeting = await MeetingModel.findOne(id);
 
+      // TODO: authenticate user
+
       if (!meeting) {
         res.statusMessage = 'Meeting with id not found';
         res.status(409).send();
@@ -29,6 +31,8 @@ export class MeetingController {
     try {
       const meetingData = <CreateMeeting>req.body;
 
+      // TODO: authernticate user
+
       if (
         !(meetingData.creator && meetingData.meetingName && meetingData.members)
       ) {
@@ -36,7 +40,9 @@ export class MeetingController {
         return res.status(406).send();
       }
 
-      MeetingModel.create(meetingData);
+      const newMeeting = await MeetingModel.create(meetingData);
+
+      return res.status(201).json(newMeeting);
     } catch (error) {
       console.error(error);
       return res.status(500);
@@ -47,6 +53,8 @@ export class MeetingController {
       // this shouldd verify user in meeting for chat
       const { from, message } = req.body;
       const { id: meetingId } = req.params;
+
+      // verify token user === from user
 
       const token = req.headers.authorization;
       const isValid = validateToken(token);

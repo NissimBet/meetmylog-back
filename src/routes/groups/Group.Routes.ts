@@ -7,4 +7,4 @@ export const router = express.Router({
 
 router.get('/group/get/:id', groupController.getGroup);
 router.post('/group/new', groupController.createGroup);
-router.put('/group/add/member', groupController.addMember);
+router.put('/group/add/member/:id', groupController.addMember);

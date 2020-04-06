@@ -11,7 +11,8 @@ export interface FindUser {
 }
 
 export interface GetUser {
-  userId: string;
+  userId?: string;
+  email?: string;
 }
 
 export interface UserData {

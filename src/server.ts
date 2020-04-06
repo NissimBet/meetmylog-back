@@ -22,6 +22,7 @@ mongoose.connect(DB_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true,
+  useFindAndModify: false,
 });
 
 const options: cors.CorsOptions = {

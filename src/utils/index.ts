@@ -7,15 +7,14 @@ import { SECRET } from './config';
 const SaltingRounds = 10;
 
 export async function encryptMessage(message: string): Promise<string> {
-  const encryptedMessage = await bcrypt.hash(message, SaltingRounds);
-  return encryptedMessage;
+  return await bcrypt.hash(message, SaltingRounds);
 }
 
 export async function compareHash(
   plaintext: string,
   hash: string
 ): Promise<boolean> {
-  return await bcrypt.compare(plaintext, hash);
+  return bcrypt.compare(plaintext, hash, (err, same) => same);
 }
 
 export interface TokenData {
@@ -31,16 +30,28 @@ export function createToken(data: TokenData): string {
   return token;
 }
 
-export function validateToken(token: string): boolean {
+export function validateToken(token: string = ''): boolean {
   let wasDecoded = false;
-  jwt.verify(token, SECRET, (_, decoded) => (wasDecoded = !!decoded));
+  jwt.verify(
+    extractBearer(token),
+    SECRET,
+    (_, decoded) => (wasDecoded = !!decoded)
+  );
   return wasDecoded;
 }
 
 export function extractToken(token: string): TokenData {
   let data: TokenData = null;
-  jwt.verify(token, SECRET, (_, decoded) => (data = <TokenData>decoded));
+  jwt.verify(
+    extractBearer(token),
+    SECRET,
+    (_, decoded) => (data = <TokenData>decoded)
+  );
   return data;
+}
+
+export function extractBearer(token: string): string {
+  return token.replace('Bearer ', '');
 }
 
 /* export function omitProperties(child: Object, parent: Object) {

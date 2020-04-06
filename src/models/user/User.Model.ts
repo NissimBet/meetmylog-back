@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   UserData,
@@ -12,7 +12,7 @@ import {
 mongoose.Promise = global.Promise;
 
 const UserSchema = new Schema({
-  userId: { type: String, default: uuid.v4 },
+  userId: { type: String, default: () => uuidv4() },
   username: String,
   name: String,
   email: String,
@@ -44,9 +44,11 @@ export const UserModel = {
       throw Error(error);
     }
   },
-  async getData({ userId }: GetUser): Promise<UserDataModel> {
+  async getData({ userId, email }: GetUser): Promise<UserDataModel> {
     try {
-      const user = await User.findOne({ userId });
+      if (!userId && !email) throw Error('data is null');
+
+      const user = await User.findOne({ $or: [{ userId }, { email }] });
 
       return user;
     } catch (error) {
@@ -68,4 +70,6 @@ export const UserModel = {
       throw Error(error);
     }
   },
+
+  // TODO: Get _id from userId
 };
