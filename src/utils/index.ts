@@ -38,7 +38,7 @@ export function validateToken(token: string): boolean {
 }
 
 export function extractToken(token: string): TokenData {
-  let data: TokenData;
+  let data: TokenData = null;
   jwt.verify(token, SECRET, (_, decoded) => (data = <TokenData>decoded));
   return data;
 }

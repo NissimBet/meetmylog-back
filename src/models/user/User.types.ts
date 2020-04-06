@@ -6,8 +6,12 @@ export interface CreateUser {
 }
 
 export interface FindUser {
-  username: string;
+  email: string;
   password: string;
+}
+
+export interface GetUser {
+  userId: string;
 }
 
 export interface UserData {
@@ -16,4 +20,9 @@ export interface UserData {
   name: string;
   email: string;
   password: string;
+}
+
+export interface CheckUser {
+  userId?: string;
+  email?: string;
 }

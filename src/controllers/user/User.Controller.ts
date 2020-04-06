@@ -2,14 +2,19 @@ import { Request, Response } from 'express';
 import { UserModel } from '../../models';
 import { FindUser, CreateUser } from '../../models/user/User.types';
 
-import { encryptMessage, createToken } from '../../utils';
+import {
+  encryptMessage,
+  createToken,
+  validateToken,
+  extractToken,
+} from '../../utils';
 
 export class UserController {
   async login(req: Request, res: Response) {
     try {
-      const { password, username } = <FindUser>req.body;
+      const { email, password } = <FindUser>req.body;
 
-      if (!username || !password) {
+      if (!email || !password) {
         res.statusMessage = 'Missing Parameters';
         return res.status(406).send();
       }
@@ -17,7 +22,7 @@ export class UserController {
       const encryptedPass = await encryptMessage(password);
 
       const user = await UserModel.findOne({
-        username,
+        email,
         password: encryptedPass,
       });
 
@@ -26,7 +31,8 @@ export class UserController {
         return res.status(404).send();
       }
 
-      const { email, userId } = user;
+      const { username, userId } = user;
+
       const token = createToken({ email, userId, username });
 
       return res.status(200).json({ email, userId, username, token });
@@ -36,9 +42,29 @@ export class UserController {
     }
   }
 
-  async getUser(req: Request, res: Response) {
-    // do some stuff
-    res.status(200).send('This is you');
+  async get(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+
+      const token = req.headers.authorization;
+      const tokenData = extractToken(token);
+
+      if (!tokenData) {
+        res.statusMessage = 'User Unauthorized';
+        return res.status(403).send();
+      }
+
+      const user = await UserModel.getData({ userId });
+      if (!user) {
+        res.statusMessage = 'User not found';
+        return res.status(404).send();
+      }
+
+      return res.status(200).json(user);
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
   }
 
   async register(req: Request, res: Response) {
@@ -59,7 +85,7 @@ export class UserController {
         username,
       };
 
-      const userExists = await UserModel.checkExistence(username);
+      const userExists = await UserModel.checkExistence({ email });
 
       if (userExists) {
         res.statusMessage = 'Username or email already in use';

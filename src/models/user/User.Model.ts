@@ -1,7 +1,13 @@
 import mongoose, { Schema } from 'mongoose';
 import uuid from 'uuid';
 
-import { UserData, CreateUser, FindUser } from './User.types';
+import {
+  UserData,
+  CreateUser,
+  FindUser,
+  CheckUser,
+  GetUser,
+} from './User.types';
 
 mongoose.Promise = global.Promise;
 
@@ -18,7 +24,7 @@ interface UserDataModel extends UserData, mongoose.Document {}
 const User = mongoose.model<UserDataModel>('users', UserSchema);
 
 export const UserModel = {
-  async create(userData: CreateUser) {
+  async create(userData: CreateUser): Promise<UserDataModel> {
     try {
       const createdUser = await User.create({ ...userData });
 
@@ -28,23 +34,37 @@ export const UserModel = {
       throw Error(error);
     }
   },
-  async findOne(userData: FindUser) {
+  async findOne(userData: FindUser): Promise<UserDataModel> {
     try {
       const user = await User.findOne({ ...userData });
 
       return user;
     } catch (error) {
-      console.log(`Error finding user ${userData.username}`, error);
+      console.log(`Error finding user ${userData.email}`, error);
       throw Error(error);
     }
   },
-  async checkExistence(username: string): Promise<boolean> {
+  async getData({ userId }: GetUser): Promise<UserDataModel> {
     try {
-      const meeting = await User.findOne({ username });
+      const user = await User.findOne({ userId });
+
+      return user;
+    } catch (error) {
+      console.log(`Error finding user ${userId}`, error);
+      throw Error(error);
+    }
+  },
+  async checkExistence(userData: CheckUser): Promise<boolean> {
+    try {
+      if (userData === null) throw Error('data is null');
+
+      const meeting = await User.findOne({
+        $or: [{ email: userData.email }, { userId: userData.userId }],
+      });
 
       return meeting !== null;
     } catch (error) {
-      console.log(`Error checking user existence ${username}`, error);
+      console.log(`Error checking user existence ${userData.email}`, error);
       throw Error(error);
     }
   },
