@@ -51,6 +51,10 @@ export const UserModel = {
 
       const user = await User.findOne({ $or: [{ userId }, { email }] });
 
+      if (!user) {
+        return null;
+      }
+
       return extractPublicProperties(user);
     } catch (error) {
       console.log(`Error finding user ${userId}`, error);
@@ -86,5 +90,11 @@ export const UserModel = {
 };
 
 export function extractPublicProperties(user: UserDataModel) {
-  return extractProperties(user, ['username', 'name', 'email', 'userId']);
+  return extractProperties(user, [
+    'username',
+    'name',
+    'email',
+    'userId',
+    '_id',
+  ]);
 }

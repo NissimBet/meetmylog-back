@@ -58,7 +58,30 @@ export class GroupController {
       return res.status(500);
     }
   }
+  async getGroups(req: Request, res: Response) {
+    try {
+      const { id } = req.query;
 
+      if (!id) {
+        res.statusMessage = 'Missing id of user';
+        res.status(406).send();
+      }
+
+      const token = req.headers.authorization;
+      if (!validateToken(token)) {
+        res.statusMessage = 'User unauthenticated';
+        return res.status(401).send();
+      }
+
+      const user = await UserModel.getData({ userId: id });
+      const groups = await GroupModel.getManyOfUser(user._id);
+
+      return res.status(200).json(groups);
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
+  }
   async addMember(req: Request, res: Response) {
     try {
       const { memberId } = req.body;

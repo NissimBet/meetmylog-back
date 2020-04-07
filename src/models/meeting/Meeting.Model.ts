@@ -6,6 +6,7 @@ import {
   MeetingData,
   Chat,
 } from './Meeting.types';
+import { extractProperties } from '../../utils';
 
 mongoose.Promise = global.Promise;
 
@@ -64,9 +65,18 @@ export const MeetingModel = {
   async findOne(meetingId: string): Promise<MeetingData> {
     try {
       const meeting = await Meeting.findOne({ meetingId });
-      return meeting;
+      return extractPublicProperties(meeting);
     } catch (error) {
       console.log(`Error finding ${meetingId}`, error);
+      throw Error(error);
+    }
+  },
+  async findOfUser(user_id: string) {
+    try {
+      const meetings = await Meeting.find({ creator: user_id });
+      return meetings.map((meeting) => extractPublicProperties(meeting));
+    } catch (error) {
+      console.log(`Error finding meetings for user ${user_id}`, error);
       throw Error(error);
     }
   },
@@ -84,3 +94,18 @@ export const MeetingModel = {
     }
   },
 };
+
+export function extractPublicProperties(meeting: MeetingModelData) {
+  return extractProperties(meeting, [
+    'meetingId',
+    'meetingName',
+    'startedDate',
+    'finishedDate',
+    'ongoing',
+    'creator',
+    'chat',
+    'members',
+    'sharingId',
+    '_id',
+  ]);
+}

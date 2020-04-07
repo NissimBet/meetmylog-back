@@ -10,7 +10,7 @@ export class MeetingController {
       const meeting = await MeetingModel.findOne(id);
 
       const token = req.headers.authorization;
-      if (validateToken(token)) {
+      if (!validateToken(token)) {
         res.statusMessage = 'User unauthenticated';
         return res.status(401).send();
       }
@@ -26,12 +26,36 @@ export class MeetingController {
       return res.status(500);
     }
   }
+  async getOfUser(req: Request, res: Response) {
+    try {
+      const { id } = req.query;
+
+      if (!id) {
+        res.statusMessage = 'Missing id of user';
+        res.status(406).send();
+      }
+
+      const token = req.headers.authorization;
+      if (!validateToken(token)) {
+        res.statusMessage = 'User unauthenticated';
+        return res.status(401).send();
+      }
+
+      const user = await UserModel.getData({ userId: id });
+      const meetings = await MeetingModel.findOfUser(user._id);
+
+      return res.status(200).json(meetings);
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
+  }
   async create(req: Request, res: Response) {
     try {
       const { creator, members, meetingName } = <CreateMeeting>req.body;
 
       const token = req.headers.authorization;
-      if (validateToken(token)) {
+      if (!validateToken(token)) {
         res.statusMessage = 'User unauthenticated';
         return res.status(401).send();
       }

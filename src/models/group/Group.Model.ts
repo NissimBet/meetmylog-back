@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupData, CreateGroup } from './Group.types';
+import { extractProperties } from '../../utils';
 
 mongoose.Promise = global.Promise;
 
@@ -43,6 +44,20 @@ export const GroupModel = {
       throw Error(error);
     }
   },
+  async getManyOfUser(user_id: string) {
+    try {
+      const groups = await Group.find({
+        $or: [
+          { creator: user_id },
+          { members: { $elemMatch: { $eq: user_id } } },
+        ],
+      });
+      return groups.map((group) => extractPublicProperties(group));
+    } catch (error) {
+      console.log(`Error finding groups for user ${user_id}`, error);
+      throw Error(error);
+    }
+  },
   async pushMember(groupId: string, member: string): Promise<GroupDataModel> {
     try {
       const group = await Group.findOne({ groupId });
@@ -58,3 +73,14 @@ export const GroupModel = {
     }
   },
 };
+
+export function extractPublicProperties(group: GroupDataModel) {
+  return extractProperties(group, [
+    'groupId',
+    'name',
+    'creator',
+    'members',
+    'meetings',
+    '_id',
+  ]);
+}

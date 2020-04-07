@@ -77,7 +77,7 @@ export class UserController {
 
       if (!(username && email && password && name)) {
         res.statusMessage = 'Missing parameters';
-        return res.status(206).send();
+        return res.status(406).send();
       }
 
       const encryptedPass = await encryptMessage(password);
