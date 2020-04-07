@@ -92,7 +92,7 @@ export const MeetingModel = {
         { meetingId },
         { $push: { chat: chat } },
         { new: true }
-      );
+      ).populate('chat.from', 'userId username name');
 
       return extractPublicProperties(meeting);
     } catch (error) {

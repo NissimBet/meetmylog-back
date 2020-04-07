@@ -48,6 +48,22 @@ expressApp.use(userRouter);
 expressApp.use(groupRouter);
 expressApp.use(meetingRouter);
 
+ioService.on('connection', (socket) => {
+  console.log('Connected');
+
+  socket.on('join-room', (room) => {
+    console.log('Joined room ', room);
+    if (!socket.rooms[room]) {
+      socket.join(room);
+    }
+
+    socket.on('message', (data) => {
+      console.log(socket.rooms);
+      socket.in(room).emit('message', data);
+    });
+  });
+});
+
 expressApp.get('/', (req, res) => {
   res.send('Hello world');
 });
