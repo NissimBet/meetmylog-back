@@ -64,7 +64,8 @@ export const MeetingModel = {
     try {
       const meeting = await Meeting.findOne({ meetingId })
         .populate('creator', 'userId username name')
-        .populate('members', 'userId username name');
+        .populate('members', 'userId username name')
+        .populate('chat.from', 'userId username name');
       return extractPublicProperties(meeting);
     } catch (error) {
       console.log(`Error finding ${meetingId}`, error);
@@ -73,7 +74,12 @@ export const MeetingModel = {
   },
   async findOfUser(user_id: string) {
     try {
-      const meetings = await Meeting.find({ creator: user_id });
+      const meetings = await Meeting.find({
+        $or: [
+          { creator: user_id },
+          { members: { $elemMatch: { $eq: user_id } } },
+        ],
+      });
       return meetings.map((meeting) => extractPublicProperties(meeting));
     } catch (error) {
       console.log(`Error finding meetings for user ${user_id}`, error);
