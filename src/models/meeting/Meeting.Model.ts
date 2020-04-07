@@ -16,18 +16,16 @@ const MeetingSchema = new Schema({
   startedDate: { type: Date, default: () => new Date() },
   finishedDate: { type: Date, default: () => new Date() },
   ongoing: { type: Boolean, default: () => true },
-  creator: { type: Schema.Types.ObjectId, ref: 'user' },
+  creator: { type: Schema.Types.ObjectId, ref: 'users' },
   chat: [
     {
-      from: { type: Schema.Types.ObjectId, ref: 'user' },
+      from: { type: Schema.Types.ObjectId, ref: 'users' },
       timeSent: { type: Date, default: () => new Date() },
       message: String,
     },
   ],
-  members: [{ type: Schema.Types.ObjectId, ref: 'user' }],
-
-  // unique id generated for link sharing
-  sharingId: { type: String },
+  members: [{ type: Schema.Types.ObjectId, ref: 'users' }],
+  isPublic: { type: Boolean, default: () => false },
 });
 
 interface MeetingModelData extends MeetingData, mongoose.Document {}
@@ -62,9 +60,11 @@ export const MeetingModel = {
       throw Error(error);
     }
   },
-  async findOne(meetingId: string): Promise<MeetingData> {
+  async findOne(meetingId: string) {
     try {
-      const meeting = await Meeting.findOne({ meetingId });
+      const meeting = await Meeting.findOne({ meetingId })
+        .populate('creator', 'userId username name')
+        .populate('members', 'userId username name');
       return extractPublicProperties(meeting);
     } catch (error) {
       console.log(`Error finding ${meetingId}`, error);
@@ -96,6 +96,7 @@ export const MeetingModel = {
 };
 
 export function extractPublicProperties(meeting: MeetingModelData) {
+  if (meeting === null) return meeting;
   return extractProperties(meeting, [
     'meetingId',
     'meetingName',
@@ -105,7 +106,7 @@ export function extractPublicProperties(meeting: MeetingModelData) {
     'creator',
     'chat',
     'members',
-    'sharingId',
     '_id',
+    'isPublic',
   ]);
 }

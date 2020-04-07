@@ -71,6 +71,24 @@ export class UserController {
     }
   }
 
+  async validateToken(req: Request, res: Response) {
+    try {
+      const token = req.headers.authorization;
+
+      if (!token) {
+        return res.status(401).send();
+      }
+
+      if (!validateToken(token)) {
+        return res.status(401).send();
+      }
+      return res.status(200).send();
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send();
+    }
+  }
+
   async register(req: Request, res: Response) {
     try {
       const { username, email, password, name } = <CreateUser>req.body;

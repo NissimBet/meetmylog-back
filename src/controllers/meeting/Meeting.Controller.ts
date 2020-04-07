@@ -1,3 +1,4 @@
+import { UserData } from './../../models/user/User.types';
 import { Request, Response } from 'express';
 import { MeetingModel, UserModel } from '../../models';
 import { CreateMeeting, Chat } from '../../models/meeting/Meeting.types';
@@ -7,7 +8,6 @@ export class MeetingController {
   async findById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const meeting = await MeetingModel.findOne(id);
 
       const token = req.headers.authorization;
       if (!validateToken(token)) {
@@ -15,9 +15,27 @@ export class MeetingController {
         return res.status(401).send();
       }
 
+      const tokenData = extractToken(token);
+      const meeting = await MeetingModel.findOne(id);
+
+      if (
+        !(
+          meeting &&
+          (meeting?.members.some(
+            (meeting) => ((meeting as unknown) as UserData).userId
+          ) ||
+            tokenData?.userId ===
+              ((meeting.creator as unknown) as UserData).userId ||
+            meeting?.isPublic)
+        )
+      ) {
+        res.statusMessage = 'User Forbidden';
+        return res.status(403).send();
+      }
+
       if (!meeting) {
         res.statusMessage = 'Meeting with id not found';
-        res.status(409).send();
+        return res.status(409).send();
       }
 
       return res.status(200).json(meeting);
@@ -101,13 +119,13 @@ export class MeetingController {
       const tokenData = extractToken(token);
 
       if (!tokenData) {
-        res.statusMessage = 'User not authorized';
+        res.statusMessage = 'User not authenticated';
         return res.status(401).send();
       }
 
       if (tokenData.userId !== String(from)) {
-        res.statusMessage = 'User id does not match';
-        return res.status(401).send();
+        res.statusMessage = 'User unauthorized';
+        return res.status(403).send();
       }
 
       const user = await UserModel.getData({ userId: from });
