@@ -84,10 +84,11 @@ export const MeetingModel = {
     try {
       const meeting = await Meeting.findOneAndUpdate(
         { meetingId },
-        { $push: { chat: chat } }
+        { $push: { chat: chat } },
+        { new: true }
       );
 
-      return meeting;
+      return extractPublicProperties(meeting);
     } catch (error) {
       console.log(`Error updating chat for ${meetingId}`, error);
       throw Error(error);

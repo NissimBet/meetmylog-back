@@ -141,9 +141,9 @@ export class MeetingController {
         timeSent: new Date(),
       };
 
-      await MeetingModel.updateChat(meetingId, chat);
+      const updateData = await MeetingModel.updateChat(meetingId, chat);
 
-      return res.status(200).send();
+      return res.status(200).json(updateData.chat[updateData.chat.length - 1]);
     } catch (error) {
       console.error(error);
       return res.status(500);

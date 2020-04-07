@@ -8,4 +8,4 @@ export const router = express.Router({
 router.get('/meeting/get', meetingController.getOfUser);
 router.get('/meeting/get/:id', meetingController.findById);
 router.post('/meeting/new', meetingController.create);
-router.put('/meeting/:id', meetingController.addChat);
+router.put('/meeting/chat/:id', meetingController.addChat);
