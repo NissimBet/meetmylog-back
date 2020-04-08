@@ -51,7 +51,8 @@ export const GroupModel = {
           { creator: user_id },
           { members: { $elemMatch: { $eq: user_id } } },
         ],
-      });
+      }).populate('members', 'userId username name');
+
       return groups.map((group) => extractPublicProperties(group));
     } catch (error) {
       console.log(`Error finding groups for user ${user_id}`, error);
