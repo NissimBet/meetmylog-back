@@ -4,25 +4,34 @@ import { CreateGroup } from '../../models/group/Group.types';
 import { validateToken } from '../../utils';
 
 export class GroupController {
+  /**
+   * crear un grupo
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
   async createGroup(req: Request, res: Response) {
     try {
       const { creator, members, name } = <CreateGroup>req.body;
 
+      // validar token
       const token = req.headers.authorization;
       if (validateToken(token)) {
         res.statusMessage = 'User unauthenticated';
         return res.status(401).send();
       }
 
+      // validar informacion del request
       if (!(creator && name && members)) {
         res.statusMessage = 'Missing Parameters';
         return res.status(406).send();
       }
 
+      // extraer los usuarios unicos
       const uniqueMembers = members.filter(
         (val, index, self) => self.indexOf(val) === index
       );
 
+      // crear el grupo con los datos
       const group = await GroupModel.create({
         creator,
         members: uniqueMembers,
@@ -35,16 +44,23 @@ export class GroupController {
       return res.status(500);
     }
   }
+  /**
+   * buscar datos de un grupo
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
   async getGroup(req: Request, res: Response) {
     try {
       const { id: groupId } = req.params;
 
+      // validar token
       const token = req.headers.authorization;
       if (validateToken(token)) {
         res.statusMessage = 'User unauthenticated';
         return res.status(401).send();
       }
 
+      // buscar grupo
       const group = await GroupModel.get(groupId);
 
       if (!group) {
@@ -58,6 +74,11 @@ export class GroupController {
       return res.status(500);
     }
   }
+  /**
+   * regresar grupos de un usuario
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
   async getGroups(req: Request, res: Response) {
     try {
       const { id } = req.query;
@@ -67,13 +88,21 @@ export class GroupController {
         res.status(406).send();
       }
 
+      // validar token
       const token = req.headers.authorization;
       if (!validateToken(token)) {
         res.statusMessage = 'User unauthenticated';
         return res.status(401).send();
       }
 
+      // buscar _id del usuario
       const user = await UserModel.getData({ userId: id });
+      if (!user) {
+        res.statusMessage = 'User does not exist';
+        return res.status(404).send();
+      }
+
+      // buscar grupos del usuario
       const groups = await GroupModel.getManyOfUser(user._id);
 
       return res.status(200).json(groups);
@@ -82,30 +111,39 @@ export class GroupController {
       return res.status(500);
     }
   }
+  /**
+   * agregar un miembto al grupo
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
   async addMember(req: Request, res: Response) {
     try {
       const { memberId } = req.body;
       const { id: groupId } = req.params;
 
+      // validar token
       const token = req.headers.authorization;
       if (validateToken(token)) {
         res.statusMessage = 'User unauthenticated';
         return res.status(401).send();
       }
 
+      // si no esta el id del miembro, error
       if (!memberId) {
         res.statusMessage = 'Missing Parameters';
         return res.status(406).send();
       }
 
-      const userExists = await UserModel.checkExistence({ userId: memberId });
+      // revisar que el usuario existe
+      const userData = await UserModel.getData({ userId: memberId });
 
-      if (!userExists) {
+      if (!userData) {
         res.statusMessage = 'User non existant';
         return res.status(404).send();
       }
 
-      GroupModel.pushMember(groupId, memberId);
+      // agregar el usuario al grupo
+      GroupModel.pushMember(groupId, userData._id);
 
       return res.status(200).send();
     } catch (error) {
