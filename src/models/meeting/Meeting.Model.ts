@@ -103,6 +103,18 @@ export const MeetingModel = {
       throw Error(error);
     }
   },
+  async closeMeeting(meetingId: string): Promise<boolean> {
+    try {
+      await Meeting.findOneAndUpdate(
+        { meetingId: meetingId },
+        { ongoing: false, finishedDate: new Date() }
+      );
+      return true;
+    } catch (error) {
+      console.log(`Error setting meeting status to closed ${meetingId}`, error);
+      throw Error(error);
+    }
+  },
 };
 
 /**

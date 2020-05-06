@@ -24,3 +24,8 @@ router.post('/meeting/new', AuthenticateUser, meetingController.create);
 router.put('/meeting/chat/:id', AuthenticateUser, meetingController.addChat);
 
 // cerrar el meeting
+router.put(
+  '/meeting/close/:id',
+  AuthenticateUser,
+  meetingController.closeMeeting
+);

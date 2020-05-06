@@ -174,10 +174,26 @@ export class MeetingController {
     }
   }
 
+  /**
+   * agregar un mensaje de chat con su identificador
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
   async closeMeeting(req: Request, res: Response) {
     try {
+      const { id: meetingId } = req.params;
+
+      // asegurar meeting existente
+      const openMeeting = await MeetingModel.findOne(meetingId);
+      if (!openMeeting) {
+        res.statusMessage = 'Reunion no encontrada';
+        return res.sendStatus(404);
+      }
+
+      await MeetingModel.closeMeeting(meetingId);
+      return res.sendStatus(200);
     } catch (error) {
-      res.sendStatus(500);
+      return res.sendStatus(500);
     }
   }
 }
