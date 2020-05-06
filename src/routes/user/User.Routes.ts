@@ -1,5 +1,6 @@
 import express from 'express';
 import { userController } from '../../controllers';
+import { AuthenticateUser } from '../../middleware/Authentication';
 
 // crear un router para pasarlo al servidor que use
 export const router = express.Router({
@@ -17,7 +18,7 @@ router.post('/user/login', userController.login);
 router.post('/user/register', userController.register);
 
 // tomar datos del usuario
-router.get('/user/get/:id', userController.get);
+router.get('/user/get/:id', AuthenticateUser, userController.get);
 
 // validar token
 router.get('/user/token', userController.validateToken);

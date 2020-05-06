@@ -1,5 +1,6 @@
 import express from 'express';
 import { meetingController } from '../../controllers';
+import { AuthenticateUser } from '../../middleware/Authentication';
 
 // crear un router para pasarlo al servidor a que lo use
 export const router = express.Router({
@@ -11,13 +12,15 @@ export const router = express.Router({
 ////////////////////////////////////////////////
 
 // sacar los meetings de un usuario
-router.get('/meeting/get', meetingController.getOfUser);
+router.get('/meeting/get', AuthenticateUser, meetingController.getOfUser);
 
 // sacar un meeting especifico
-router.get('/meeting/get/:id', meetingController.findById);
+router.get('/meeting/get/:id', AuthenticateUser, meetingController.findById);
 
 // crear meeting
-router.post('/meeting/new', meetingController.create);
+router.post('/meeting/new', AuthenticateUser, meetingController.create);
 
 // agregar un mensaje de chat al meeting
-router.put('/meeting/chat/:id', meetingController.addChat);
+router.put('/meeting/chat/:id', AuthenticateUser, meetingController.addChat);
+
+// cerrar el meeting

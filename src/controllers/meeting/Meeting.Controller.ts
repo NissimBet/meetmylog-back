@@ -16,11 +16,6 @@ export class MeetingController {
 
       // validar token de autenticacion
       const token = req.headers.authorization;
-      if (!validateToken(token)) {
-        res.statusMessage = 'User unauthenticated';
-        return res.status(401).send();
-      }
-
       // extraer los datos del token
       const tokenData = extractToken(token);
       // buscar el meeting
@@ -80,13 +75,6 @@ export class MeetingController {
         res.status(406).send();
       }
 
-      // validar token
-      const token = req.headers.authorization;
-      if (!validateToken(token)) {
-        res.statusMessage = 'User unauthenticated';
-        return res.status(401).send();
-      }
-
       // regresar el id del usuario, las busquedas de referencia son por el id interno de mongo
       const user = await UserModel.getData({ userId: id });
 
@@ -111,13 +99,6 @@ export class MeetingController {
   async create(req: Request, res: Response) {
     try {
       const { creator, members, meetingName } = <CreateMeeting>req.body;
-
-      // validar token
-      const token = req.headers.authorization;
-      if (!validateToken(token)) {
-        res.statusMessage = 'User unauthenticated';
-        return res.status(401).send();
-      }
 
       // si no hay los datos, error
       if (!(creator && meetingName && members)) {
@@ -168,22 +149,6 @@ export class MeetingController {
       const { from, message } = req.body;
       const { id: meetingId } = req.params;
 
-      // extraer token y autenticar
-      const token = req.headers.authorization;
-      const tokenData = extractToken(token);
-
-      if (!tokenData) {
-        res.statusMessage = 'User not authenticated';
-        return res.status(401).send();
-      }
-
-      // deberia hacerse con todas las llamadas
-      // verificar que el usuario del token es el mismo del chat
-      if (tokenData.userId !== String(from)) {
-        res.statusMessage = 'User unauthorized';
-        return res.status(403).send();
-      }
-
       // buscar datos del usuario
       const user = await UserModel.getData({ userId: from });
 
@@ -206,6 +171,13 @@ export class MeetingController {
     } catch (error) {
       console.error(error);
       return res.status(500);
+    }
+  }
+
+  async closeMeeting(req: Request, res: Response) {
+    try {
+    } catch (error) {
+      res.sendStatus(500);
     }
   }
 }

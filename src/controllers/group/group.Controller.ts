@@ -13,13 +13,6 @@ export class GroupController {
     try {
       const { creator, members, name } = <CreateGroup>req.body;
 
-      // validar token
-      const token = req.headers.authorization;
-      if (validateToken(token)) {
-        res.statusMessage = 'User unauthenticated';
-        return res.status(401).send();
-      }
-
       // validar informacion del request
       if (!(creator && name && members)) {
         res.statusMessage = 'Missing Parameters';
@@ -53,13 +46,6 @@ export class GroupController {
     try {
       const { id: groupId } = req.params;
 
-      // validar token
-      const token = req.headers.authorization;
-      if (validateToken(token)) {
-        res.statusMessage = 'User unauthenticated';
-        return res.status(401).send();
-      }
-
       // buscar grupo
       const group = await GroupModel.get(groupId);
 
@@ -88,13 +74,6 @@ export class GroupController {
         res.status(406).send();
       }
 
-      // validar token
-      const token = req.headers.authorization;
-      if (!validateToken(token)) {
-        res.statusMessage = 'User unauthenticated';
-        return res.status(401).send();
-      }
-
       // buscar _id del usuario
       const user = await UserModel.getData({ userId: id });
       if (!user) {
@@ -120,13 +99,6 @@ export class GroupController {
     try {
       const { memberId } = req.body;
       const { id: groupId } = req.params;
-
-      // validar token
-      const token = req.headers.authorization;
-      if (validateToken(token)) {
-        res.statusMessage = 'User unauthenticated';
-        return res.status(401).send();
-      }
 
       // si no esta el id del miembro, error
       if (!memberId) {

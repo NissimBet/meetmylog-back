@@ -1,5 +1,6 @@
 import express from 'express';
 import { groupController } from '../../controllers';
+import { AuthenticateUser } from '../../middleware/Authentication';
 
 // crear un router para pasarlo al servidor que use
 export const router = express.Router({
@@ -11,13 +12,17 @@ export const router = express.Router({
 ////////////////////////////////////////////////
 
 // sacar grupos de un usuario
-router.get('/group/get', groupController.getGroups);
+router.get('/group/get', AuthenticateUser, groupController.getGroups);
 
 // sacar datos de un grupo
-router.get('/group/get/:id', groupController.getGroup);
+router.get('/group/get/:id', AuthenticateUser, groupController.getGroup);
 
 // crear un grupo nuevo
-router.post('/group/new', groupController.createGroup);
+router.post('/group/new', AuthenticateUser, groupController.createGroup);
 
 // agregar miembros al grupo
-router.put('/group/add/member/:id', groupController.addMember);
+router.put(
+  '/group/add/member/:id',
+  AuthenticateUser,
+  groupController.addMember
+);

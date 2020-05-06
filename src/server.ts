@@ -68,7 +68,7 @@ ioService.on('connection', (socket) => {
     // si un socket entra a un room agregarle un listener para que
     // cuando manda "message", emitir el dato enviado a los demas en el room
     socket.on('message', (data) => {
-      console.log(socket.rooms);
+      console.log(socket.rooms, data);
       socket.in(room).emit('message', data);
     });
   });

@@ -69,17 +69,6 @@ export class UserController {
       // { id: userId } => userId = id
       const { id: userId } = req.params;
 
-      // extraer token del header de autorizacion
-      // token esta en formato "Bearer 'token'"
-      const token = req.headers.authorization;
-      const tokenData = extractToken(token);
-
-      // si no hay token, error
-      if (!tokenData) {
-        res.statusMessage = 'User Unauthorized';
-        return res.status(401).send();
-      }
-
       // buscar usuario
       const user = await UserModel.getPublicData({ userId });
       if (!user) {
