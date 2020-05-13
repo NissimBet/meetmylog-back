@@ -75,6 +75,6 @@ ioService.on('connection', (socket) => {
   });
 });
 
-expressApp.options('*', cors(options));
+expressApp.options('*', cors());
 
 export { httpServer as app };
