@@ -37,7 +37,6 @@ const options: cors.CorsOptions = {
     'Accept',
     'X-Access-Token',
     'Authorization',
-    'Access-Control-Allow-Origin',
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
@@ -75,6 +74,6 @@ ioService.on('connection', (socket) => {
   });
 });
 
-expressApp.options('*', cors());
+expressApp.options('*', cors(options));
 
 export { httpServer as app };
