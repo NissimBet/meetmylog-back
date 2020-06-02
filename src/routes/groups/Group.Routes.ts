@@ -26,3 +26,10 @@ router.put(
   AuthenticateUser,
   groupController.addMember
 );
+
+// eliminar un miembro de un grupo
+router.post(
+  '/group/remove/member/:id',
+  AuthenticateUser,
+  groupController.removeMemeber
+);

@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupData, CreateGroup } from './Group.types';
 import { extractProperties } from '../../utils';
+import { UserData } from '../user/User.types';
 
 // que mongoose use las promsas globales internamente
 mongoose.Promise = global.Promise;
@@ -80,14 +81,36 @@ export const GroupModel = {
    * @param groupId identificador del grupo
    * @param member identificador del miembro que se quiere agregar
    */
-  async pushMember(groupId: string, member: string): Promise<GroupDataModel> {
+  async pushMember(groupId: string, members: any[]): Promise<GroupDataModel> {
     try {
       const group = await Group.findOne({ groupId });
-      if (member in group.members) {
-        group.members.push(member);
-        await group.save();
+      for (const member of members) {
+        if (!group.members.includes(member._id)) {
+          group.members.push(member);
+          await group.save();
+        }
       }
 
+      return group;
+    } catch (error) {
+      console.log(`Error, Could not update ${groupId}`, error);
+      throw Error(error);
+    }
+  },
+
+  /**
+   * quita un miembro al grupo
+   * @param groupId identificador del grupo
+   * @param member identificador del miembro que se quiere agregar
+   */
+  async popMember(groupId: string, member: string): Promise<GroupDataModel> {
+    try {
+      const group = await Group.findOne({ groupId });
+      if (group.members.includes(member)) {
+        const index = group.members.findIndex((id) => id == member);
+        group.members.splice(index, 1);
+        await group.save();
+      }
       return group;
     } catch (error) {
       console.log(`Error, Could not update ${groupId}`, error);

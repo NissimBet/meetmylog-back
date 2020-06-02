@@ -18,7 +18,7 @@ router.post('/user/login', userController.login);
 router.post('/user/register', userController.register);
 
 // tomar datos del usuario
-router.get('/user/get/:id', AuthenticateUser, userController.get);
+router.get('/user/get', AuthenticateUser, userController.get);
 
 // validar token
 router.get('/user/token', userController.validateToken);

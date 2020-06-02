@@ -1,5 +1,8 @@
 export interface CreateMeeting
-  extends Pick<MeetingData, 'meetingName' | 'creator' | 'members'> {}
+  extends Pick<
+    MeetingData,
+    'meetingName' | 'creator' | 'members' | 'groupId'
+  > {}
 
 export interface UpdateMeeting
   extends Partial<Pick<MeetingData, 'chat' | 'members' | 'isPublic'>>,
@@ -18,6 +21,7 @@ export interface MeetingData {
   finishedDate: Date;
   ongoing: boolean;
   creator: string;
+  groupId?: string;
   chat: Chat[];
   members: string[];
   isPublic: boolean;

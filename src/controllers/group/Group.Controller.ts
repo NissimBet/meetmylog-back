@@ -23,10 +23,15 @@ export class GroupController {
       const uniqueMembers = members.filter(
         (val, index, self) => self.indexOf(val) === index
       );
-
+      const userC = await UserModel.getData({ userId: creator });
+      if (!userC) {
+        res.statusMessage = 'User does not exist';
+        return res.status(404).send();
+      }
+      uniqueMembers.splice(0, 0, userC._id);
       // crear el grupo con los datos
       const group = await GroupModel.create({
-        creator,
+        creator: userC._id,
         members: uniqueMembers,
         name,
       });
@@ -97,25 +102,42 @@ export class GroupController {
    */
   async addMember(req: Request, res: Response) {
     try {
-      const { memberId } = req.body;
+      const { members } = req.body;
       const { id: groupId } = req.params;
 
       // si no esta el id del miembro, error
-      if (!memberId) {
+      if (!members) {
         res.statusMessage = 'Missing Parameters';
         return res.status(406).send();
       }
-
-      // revisar que el usuario existe
-      const userData = await UserModel.getData({ userId: memberId });
-
-      if (!userData) {
-        res.statusMessage = 'User non existant';
-        return res.status(404).send();
-      }
-
       // agregar el usuario al grupo
-      GroupModel.pushMember(groupId, userData._id);
+      GroupModel.pushMember(groupId, members);
+
+      return res.status(200).send();
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
+  }
+  /**
+   * quita un miembto al grupo
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
+  async removeMemeber(req: Request, res: Response) {
+    try {
+      const { member } = req.body;
+      const { id: groupId } = req.params;
+
+      console.log(member);
+
+      // si no esta el id del miembro, error
+      if (!member) {
+        res.statusMessage = 'Missing Parameters';
+        return res.status(406).send();
+      }
+      // agregar el usuario al grupo
+      GroupModel.popMember(groupId, member);
 
       return res.status(200).send();
     } catch (error) {

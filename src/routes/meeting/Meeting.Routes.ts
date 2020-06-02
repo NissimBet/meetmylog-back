@@ -14,6 +14,8 @@ export const router = express.Router({
 // sacar los meetings de un usuario
 router.get('/meeting/get', AuthenticateUser, meetingController.getOfUser);
 
+router.get('/meeting/get/team', AuthenticateUser, meetingController.getOfTeam);
+
 // sacar un meeting especifico
 router.get('/meeting/get/:id', AuthenticateUser, meetingController.findById);
 

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UserModel } from '../../models';
-import { FindUser, CreateUser } from '../../models/user/User.types';
+import { FindUser, CreateUser, GetUser } from '../../models/user/User.types';
 
 import {
   encryptMessage,
@@ -67,10 +67,10 @@ export class UserController {
     try {
       // { data } = obj => data = obj.data
       // { id: userId } => userId = id
-      const { id: userId } = req.params;
+      const userData = <GetUser>req.query;
 
       // buscar usuario
-      const user = await UserModel.getPublicData({ userId });
+      const user = await UserModel.getPublicData(userData);
       if (!user) {
         res.statusMessage = 'User not found';
         return res.status(404).send();

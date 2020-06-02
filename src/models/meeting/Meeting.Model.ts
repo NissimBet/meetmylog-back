@@ -24,6 +24,7 @@ const MeetingSchema = new Schema({
   ],
   members: [{ type: Schema.Types.ObjectId, ref: 'users' }],
   isPublic: { type: Boolean, default: () => false },
+  groupId: { type: Schema.Types.ObjectId, ref: 'groups', require: false },
 });
 
 interface MeetingModelData extends MeetingData, mongoose.Document {}
@@ -79,6 +80,22 @@ export const MeetingModel = {
       return meetings.map((meeting) => extractPublicProperties(meeting));
     } catch (error) {
       console.log(`Error finding meetings for user ${user_id}`, error);
+      throw Error(error);
+    }
+  },
+  /**
+   * buscar los meetings en los que un equipo ha participado
+   * @param user_id identificador del usuario
+   */
+  async findOfTeam(groupId: string) {
+    try {
+      const meetings = await Meeting.find({
+        groupId: groupId,
+      });
+
+      return meetings.map((meeting) => extractPublicProperties(meeting));
+    } catch (error) {
+      console.log(`Error finding meetings for user ${groupId}`, error);
       throw Error(error);
     }
   },

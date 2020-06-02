@@ -1,8 +1,9 @@
 import { UserData } from './../../models/user/User.types';
 import { Request, Response } from 'express';
-import { MeetingModel, UserModel } from '../../models';
+import { MeetingModel, UserModel, GroupModel } from '../../models';
 import { CreateMeeting, Chat } from '../../models/meeting/Meeting.types';
 import { extractToken, validateToken } from './../../utils';
+import { GroupData } from '../../models/group/Group.types';
 
 export class MeetingController {
   /**
@@ -92,13 +93,47 @@ export class MeetingController {
     }
   }
   /**
+   * regresa los meetings en los que participo un equipo
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
+  async getOfTeam(req: Request, res: Response) {
+    try {
+      const { id } = req.query;
+
+      // si no esta el id, error
+      if (!id) {
+        res.statusMessage = 'Missing id of team';
+        res.status(406).send();
+      }
+
+      // regresar el id del usuario, las busquedas de referencia son por el id interno de mongo
+      const group = await GroupModel.get(id);
+
+      if (!group) {
+        res.statusMessage = 'Group not found';
+        return res.status(404).send();
+      }
+
+      const meetings = await MeetingModel.findOfTeam(group._id);
+
+      return res.status(200).json(meetings);
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
+  }
+
+  /**
    * crear un meeting
    * @param req request, tiene los datos de la llamada a la ruta
    * @param res response, tiene las funciones para resolver la llamada
    */
   async create(req: Request, res: Response) {
     try {
-      const { creator, members, meetingName } = <CreateMeeting>req.body;
+      const { creator, members, meetingName, groupId } = <CreateMeeting>(
+        req.body
+      );
 
       // si no hay los datos, error
       if (!(creator && meetingName && members)) {
@@ -127,13 +162,23 @@ export class MeetingController {
       ).map((data) => data._id);
       // ^ regresar el _id
 
-      const newMeeting = await MeetingModel.create({
-        creator: user._id,
-        meetingName,
-        members: meetingUsers,
-      });
-
-      return res.status(201).json(newMeeting);
+      if (groupId !== '0') {
+        const group = await GroupModel.get(groupId);
+        const newMeeting = await MeetingModel.create({
+          creator: user._id,
+          meetingName,
+          members: meetingUsers,
+          groupId: group._id,
+        });
+        return res.status(201).json(newMeeting);
+      } else {
+        const newMeeting = await MeetingModel.create({
+          creator: user._id,
+          meetingName,
+          members: meetingUsers,
+        });
+        return res.status(201).json(newMeeting);
+      }
     } catch (error) {
       console.error(error);
       return res.status(500);
