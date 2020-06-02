@@ -124,7 +124,7 @@ export class GroupController {
    * @param req request, tiene los datos de la llamada a la ruta
    * @param res response, tiene las funciones para resolver la llamada
    */
-  async removeMemeber(req: Request, res: Response) {
+  async removeMember(req: Request, res: Response) {
     try {
       const { member } = req.body;
       const { id: groupId } = req.params;

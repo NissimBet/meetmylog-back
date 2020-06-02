@@ -31,5 +31,5 @@ router.put(
 router.post(
   '/group/remove/member/:id',
   AuthenticateUser,
-  groupController.removeMemeber
+  groupController.removeMember
 );

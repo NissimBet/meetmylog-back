@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { CreateMeeting, MeetingData, Chat } from './Meeting.types';
+import { CreateMeeting, MeetingData, Chat, Notes } from './Meeting.types';
 import { extractProperties } from '../../utils';
 
 // que mongoose use las promsas globales internamente
@@ -22,9 +22,23 @@ const MeetingSchema = new Schema({
       message: String,
     },
   ],
+  responsabilities: [
+    {
+      member: { type: Schema.Types.ObjectId, ref: 'users' },
+      responsability: String,
+      require: false,
+    },
+  ],
   members: [{ type: Schema.Types.ObjectId, ref: 'users' }],
   isPublic: { type: Boolean, default: () => false },
   groupId: { type: Schema.Types.ObjectId, ref: 'groups', require: false },
+  notes: [
+    {
+      member: { type: Schema.Types.ObjectId, ref: 'users' },
+      notes: String,
+      require: false,
+    },
+  ],
 });
 
 interface MeetingModelData extends MeetingData, mongoose.Document {}
@@ -57,7 +71,10 @@ export const MeetingModel = {
       const meeting = await Meeting.findOne({ meetingId })
         .populate('creator', 'userId username name')
         .populate('members', 'userId username name')
-        .populate('chat.from', 'userId username name');
+        .populate('chat.from', 'userId username name')
+        .populate('responsabilities.member', 'userId username name')
+        .populate('notes.member', 'userId username name');
+      console.log(extractPublicProperties(meeting));
       return extractPublicProperties(meeting);
     } catch (error) {
       console.log(`Error finding ${meetingId}`, error);
@@ -120,6 +137,75 @@ export const MeetingModel = {
       throw Error(error);
     }
   },
+  /**
+   * agregar una responsabilidad al meeting
+   * @param meetingId identificador del meeting que se quiere agregar un mensaje de chat
+   * @param responsability datos del chat
+   */
+  async addResponsability(meetingId: string, responsability: any) {
+    try {
+      // modificar un meeting y agregar el mensaje de chat
+      const meeting = await Meeting.findOneAndUpdate(
+        { meetingId },
+        { $push: { responsabilities: responsability } },
+        // regresar el nuevo objeto
+        { new: true }
+      ).populate('responsabilities.member', 'userId username name');
+      return extractPublicProperties(meeting);
+    } catch (error) {
+      console.log(`Error updating chat for ${meetingId}`, error);
+      throw Error(error);
+    }
+  },
+
+  /**
+   * agregar una responsabilidad al meeting
+   * @param meetingId identificador del meeting que se quiere agregar un mensaje de chat
+   * @param responsability datos del chat
+   */
+  async updateNotes(meetingId: string, notes: Notes) {
+    try {
+      // modificar un meeting y agregar el mensaje de chat
+      const meeting = await Meeting.findOne({ meetingId });
+      if (meeting.notes.some((e) => e.member == notes.member)) {
+        const index = meeting.notes.findIndex(
+          (id) => id.member == notes.member
+        );
+        console.log(index);
+        meeting.notes[index].notes = notes.notes;
+        await meeting.save();
+      } else {
+        meeting.notes.push(notes);
+        await meeting.save();
+      }
+      return extractPublicProperties(meeting);
+    } catch (error) {
+      console.log(`Error updating chat for ${meetingId}`, error);
+      throw Error(error);
+    }
+  },
+  /**
+   * quita una responsabilidad al meeting
+   * @param meetingId identificador del meeting que se quiere agregar un mensaje de chat
+   * @param responsability datos del chat
+   */
+  async removeResponsability(meetingId: string, rId: string) {
+    try {
+      // modificar un meeting y agregar el mensaje de chat
+      const meeting = await Meeting.findOne({ meetingId });
+      if (meeting.responsabilities.some((e) => e._id == rId)) {
+        const index = meeting.responsabilities.findIndex((id) => id._id == rId);
+        console.log(index);
+        meeting.responsabilities.splice(index, 1);
+        await meeting.save();
+      }
+      return meeting;
+    } catch (error) {
+      console.log(`Error, Could not update ${meetingId}`, error);
+      throw Error(error);
+    }
+  },
+
   async closeMeeting(meetingId: string): Promise<boolean> {
     try {
       await Meeting.findOneAndUpdate(
@@ -151,5 +237,7 @@ export function extractPublicProperties(meeting: MeetingModelData) {
     'members',
     '_id',
     'isPublic',
+    'responsabilities',
+    'notes',
   ]);
 }

@@ -25,6 +25,27 @@ router.post('/meeting/new', AuthenticateUser, meetingController.create);
 // agregar un mensaje de chat al meeting
 router.put('/meeting/chat/:id', AuthenticateUser, meetingController.addChat);
 
+// actualizar notas de meeting
+router.put(
+  '/meeting/notes/:id',
+  AuthenticateUser,
+  meetingController.updateNotes
+);
+
+// agregar una responsabilidad
+router.put(
+  '/meeting/responsability/:id',
+  AuthenticateUser,
+  meetingController.addResponsability
+);
+
+// agregar una responsabilidad
+router.post(
+  '/meeting/responsability/remove/:id',
+  AuthenticateUser,
+  meetingController.removeResponsibility
+);
+
 // cerrar el meeting
 router.put(
   '/meeting/close/:id',

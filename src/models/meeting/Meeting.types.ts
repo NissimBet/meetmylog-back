@@ -14,6 +14,17 @@ export interface Chat {
   message: string;
 }
 
+export interface Responsabilities {
+  _id: string;
+  member: string;
+  responsability: string;
+}
+
+export interface Notes {
+  member: string;
+  notes: string;
+}
+
 export interface MeetingData {
   meetingName: string;
   meetingId: string;
@@ -25,4 +36,6 @@ export interface MeetingData {
   chat: Chat[];
   members: string[];
   isPublic: boolean;
+  responsabilities: Responsabilities[];
+  notes: Notes[];
 }

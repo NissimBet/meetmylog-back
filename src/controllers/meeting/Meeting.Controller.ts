@@ -1,7 +1,7 @@
 import { UserData } from './../../models/user/User.types';
 import { Request, Response } from 'express';
 import { MeetingModel, UserModel, GroupModel } from '../../models';
-import { CreateMeeting, Chat } from '../../models/meeting/Meeting.types';
+import { CreateMeeting, Chat, Notes } from '../../models/meeting/Meeting.types';
 import { extractToken, validateToken } from './../../utils';
 import { GroupData } from '../../models/group/Group.types';
 
@@ -213,6 +213,97 @@ export class MeetingController {
       const updateData = await MeetingModel.updateChat(meetingId, chat);
 
       return res.status(200).json(updateData.chat[updateData.chat.length - 1]);
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
+  }
+  /**
+   * agregar una responsabilidad con su identificador
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
+  async addResponsability(req: Request, res: Response) {
+    try {
+      const { userId, responsability } = req.body;
+      const { id: meetingId } = req.params;
+
+      const respons: any = {
+        member: String(userId),
+        responsability: String(responsability),
+      };
+
+      // agregar el chat al meeting
+      const updateData = await MeetingModel.addResponsability(
+        meetingId,
+        respons
+      );
+
+      return res
+        .status(200)
+        .json(
+          updateData.responsabilities[updateData.responsabilities.length - 1]
+        );
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
+  }
+  /**
+   * quita una responsabilidad de la junta
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
+  async removeResponsibility(req: Request, res: Response) {
+    try {
+      const { rId } = req.body;
+      const { id: meetingId } = req.params;
+
+      console.log(meetingId);
+
+      // si no esta el id del miembro, error
+      if (!meetingId) {
+        res.statusMessage = 'Missing Parameters';
+        return res.status(406).send();
+      }
+      // agregar el usuario al grupo
+      MeetingModel.removeResponsability(meetingId, rId);
+
+      return res.status(200).send();
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
+  }
+  /**
+   * actualiza las notas de un usuario
+   * @param req request, tiene los datos de la llamada a la ruta
+   * @param res response, tiene las funciones para resolver la llamada
+   */
+  async updateNotes(req: Request, res: Response) {
+    try {
+      const { member, notes } = req.body;
+      const { id: meetingId } = req.params;
+
+      // buscar datos del usuario
+      const user = await UserModel.getData({ userId: member });
+
+      // si no esta el usuario, mandar error (solo para mamar, no deberia pasar)
+      if (!user) {
+        res.statusMessage = 'User does not exist';
+        return res.status(404).send();
+      }
+
+      const note: Notes = {
+        member: String(user._id),
+        notes: String(notes),
+      };
+      console.log(note);
+
+      // agregar el chat al meeting
+      const updateData = await MeetingModel.updateNotes(meetingId, note);
+
+      return res.sendStatus(200);
     } catch (error) {
       console.error(error);
       return res.status(500);
