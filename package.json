@@ -28,7 +28,7 @@
     "lodash.omit": "^4.5.0",
     "lodash.pick": "^4.4.0",
     "mongoose": "^5.9.7",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.4.0",
     "uuid": "^7.0.3"
   },
   "devDependencies": {
